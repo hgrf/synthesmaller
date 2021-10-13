@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "rotary_encoder.h": "c",
+        "array": "c",
+        "hash_map": "c",
+        "hash_set": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c"
+    }
+}
