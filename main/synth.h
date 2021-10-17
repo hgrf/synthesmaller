@@ -42,7 +42,7 @@ void synth_get_params(oscillator_params_t *osc1_params, oscillator_params_t *osc
                         oscillator_params_t *lfo_params, envelope_params_t *envelope_params,
                         synth_params_t *synth_params);
 
-void synth_map_envelope(uint8_t *buffer, uint16_t width, uint8_t height);
+void synth_map_envelope(uint8_t *buffer, uint16_t width, uint8_t height, float *time_window);
 
 void synth_enable_lfo(uint8_t enabled);
 void synth_enable_osc2_sync(uint8_t enabled);

@@ -550,7 +550,7 @@ void synth_get_params(oscillator_params_t *osc1_params, oscillator_params_t *osc
     xSemaphoreGive(m_osc_sem);
 }
 
-void synth_map_envelope(uint8_t *buffer, uint16_t width, uint8_t height)
+void synth_map_envelope(uint8_t *buffer, uint16_t width, uint8_t height, float *time_window)
 {
     xSemaphoreTake(m_osc_sem, portMAX_DELAY);
 
@@ -567,6 +567,11 @@ void synth_map_envelope(uint8_t *buffer, uint16_t width, uint8_t height)
      */
     int sustain_plateau_width = increment * width / 5;
     int offset = 0;
+
+    /* calculate time window (envelope buffers are downsampled by a factor of 100
+     * with respect to SAMPLING_FREQ)
+     */
+    *time_window = (float) width * increment / SAMPLING_FREQ * 100;
 
     /* downsample the envelope buffers to fit into buffer */
     for(int i = 0; i < width; i++) {

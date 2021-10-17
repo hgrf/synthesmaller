@@ -35,7 +35,7 @@ using namespace gfx;
 #define WIDTH_WAVEFORM          (28)
 #define WIDTH_PADDING           (10)
 #define WIDTH_ENVELOPE          (200)
-#define HEIGHT_ENVELOPE         (80)
+#define HEIGHT_ENVELOPE         (70)
 
 // To speed up transfers, every SPI transfer sends as much data as possible. 
 
@@ -190,11 +190,14 @@ static void display_synth_params(synth_params_t *params, synth_params_t *params_
 
 static void display_envelope(envelope_params_t *params, envelope_params_t *params_cached, int x, int y)
 {
+    float time_window;
+    char *time_window_str;
+
     /* check if parameters have changed */
     if(compare_envelope_params(params, params_cached) == true)
         return;
 
-    synth_map_envelope(envelope_buffer, WIDTH_ENVELOPE, HEIGHT_ENVELOPE);
+    synth_map_envelope(envelope_buffer, WIDTH_ENVELOPE, HEIGHT_ENVELOPE, &time_window);
     draw::filled_rectangle(lcd, srect16(x, y, x + WIDTH_ENVELOPE, y + HEIGHT_ENVELOPE), lcd_color::black);
     for(int i = 0; i < WIDTH_ENVELOPE - 1; i++) {
         draw::line(
@@ -208,6 +211,31 @@ static void display_envelope(envelope_params_t *params, envelope_params_t *param
             lcd_color::white
         );
     }
+
+    draw::filled_rectangle(
+        lcd,
+        srect16(
+            x + WIDTH_ENVELOPE - 2 * WIDTH_PADDING - 5 * FONT_DELTA_X,  // total length 5 characters: x.x s (see below)
+            y + HEIGHT_ENVELOPE + 10,
+            x + WIDTH_ENVELOPE,
+            y + HEIGHT_ENVELOPE + 30
+        ),
+        lcd_color::black
+    );
+    asprintf(&time_window_str, "%.1f s", time_window);
+    draw::text(
+        lcd,
+        srect16(
+            x + WIDTH_ENVELOPE - WIDTH_PADDING - 5 * FONT_DELTA_X,
+            y + HEIGHT_ENVELOPE + 20 - TEXT_HEIGHT / 2,
+            x + WIDTH_ENVELOPE,
+            y + HEIGHT_ENVELOPE + 20 + TEXT_HEIGHT / 2
+        ),
+        (const char *) time_window_str,
+        FONT,
+        lcd_color::white
+    );
+    free(time_window_str);
 
     /* update cache */
     memcpy(params_cached, params, sizeof(envelope_params_t));
