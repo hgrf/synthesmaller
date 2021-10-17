@@ -1,5 +1,11 @@
 ## TODO
 
+- display: show sustain plateau as dashed / dotted line
+- display: show envelope values
+- display: add extra padding before text in black rectangles
+- display: check for parameter cache initialization
+
+- fix: sustain = 0 does not work
 - improve velocity -> amplitude mapping
 
 - review sync logic in synth_calculate_buffer()
@@ -7,12 +13,9 @@
 - using a look up table for sin() could probably remove need for buffers
 - include hard and/or soft reset in audio codec driver
 - figure out this warning: ../main/signal_generator.c:48:5: warning: variably modified 'buffer' at file scope
-- can we connect EVM to USB board and still control I2C ?
-- check out driver at https://www.ti.com/tool/TLV320AIC31XXSW-LINUX
 
 ## Planned features
 
-- show waveforms and envelope on display
 - add more voices
 - add simple sequencer
 - add noise
