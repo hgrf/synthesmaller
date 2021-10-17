@@ -555,11 +555,13 @@ void synth_map_envelope(uint8_t *buffer, uint16_t width, uint8_t height)
     xSemaphoreTake(m_osc_sem, portMAX_DELAY);
 
     float sample;
-    int envelope_buffer_size = m_envelope.attack_decay_buffer_size + m_envelope.release_buffer_size;
+    int total_envelope_buffer_size = m_envelope.attack_decay_buffer_size + m_envelope.release_buffer_size;
     /* calculate the steps by which we sample the envelope buffers;
-     * we leave 20% of the total width for a "sustain plateau"
+     * we leave 20% of the total width for a "sustain plateau";
+     * we round up (+1) this increment to avoid missing parts of the
+     * envelope due to rounding errors
      */
-    int increment = envelope_buffer_size / (width - width / 5);
+    int increment = total_envelope_buffer_size / (width - width / 5) + 1;
     /* width of the "sustain plateau" in terms of envelope buffer
      * samples
      */
@@ -572,10 +574,15 @@ void synth_map_envelope(uint8_t *buffer, uint16_t width, uint8_t height)
         if((offset >= m_envelope.attack_decay_buffer_size) &&
             (offset < m_envelope.attack_decay_buffer_size + sustain_plateau_width)) {
             sample = m_envelope.attack_decay_buffer[m_envelope.attack_decay_buffer_size - 1];
-        } else {
+        /* are we within the window of the two envelope buffers? */
+        } else if (offset < total_envelope_buffer_size + sustain_plateau_width) {
             sample = (offset < m_envelope.attack_decay_buffer_size)
                     ? m_envelope.attack_decay_buffer[offset]
                     : m_envelope.release_buffer[offset - sustain_plateau_width - m_envelope.attack_decay_buffer_size];
+        /* if the total envelope buffer size is smaller than the width we want to plot, set zeros */
+        } else {
+            buffer[i] = 0;
+            continue;
         }
 
         buffer[i] = sample / m_envelope.params.amplitude * height;
