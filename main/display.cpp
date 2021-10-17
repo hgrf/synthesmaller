@@ -34,6 +34,8 @@ using namespace gfx;
 #define MAX_TEXT_WIDTH_NAME     (4 * FONT_DELTA_X)      // OSC1, OSC2 or LFO
 #define WIDTH_WAVEFORM          (28)
 #define WIDTH_PADDING           (10)
+#define WIDTH_ENVELOPE          (200)
+#define HEIGHT_ENVELOPE         (80)
 
 // To speed up transfers, every SPI transfer sends as much data as possible. 
 
@@ -75,6 +77,10 @@ static synth_params_t synth_params_cached = {
                             // TODO: check if cache was initialized in the functions below
 };
 
+static envelope_params_t envelope_params;
+static envelope_params_t envelope_params_cached;
+static uint8_t envelope_buffer[WIDTH_ENVELOPE];
+
 static void sketch_waveform(waveform_t waveform, int x, int y, int width, int amplitude, lcd_type::pixel_type color)
 {
     switch(waveform) {
@@ -111,6 +117,16 @@ static bool compare_synth_params(synth_params_t *params1, synth_params_t *params
 {
     return (params1->lfo_enabled == params2->lfo_enabled) \
         && (params1->osc2_sync_enabled == params2->osc2_sync_enabled);
+}
+
+static bool compare_envelope_params(envelope_params_t *params1, envelope_params_t *params2)
+{
+    // NOTE: we do not check the amplitude here, because the displayed curve is
+    //       normalized to the plot height
+    return (params1->attack == params2->attack) \
+        && (params1->decay == params2->decay) \
+        && (params1->release == params2->release) \
+        && (params1->sustain == params2->sustain);
 }
 
 static void display_oscillator_params(const char *oscillator_name, oscillator_params_t *params, oscillator_params_t *params_cached, int x, int y)
@@ -172,16 +188,42 @@ static void display_synth_params(synth_params_t *params, synth_params_t *params_
     memcpy(params_cached, params, sizeof(synth_params_t));
 }
 
+static void display_envelope(envelope_params_t *params, envelope_params_t *params_cached, int x, int y)
+{
+    /* check if parameters have changed */
+    if(compare_envelope_params(params, params_cached) == true)
+        return;
+
+    synth_map_envelope(envelope_buffer, WIDTH_ENVELOPE, HEIGHT_ENVELOPE);
+    draw::filled_rectangle(lcd, srect16(x, y, x + WIDTH_ENVELOPE, y + HEIGHT_ENVELOPE), lcd_color::black);
+    for(int i = 0; i < WIDTH_ENVELOPE - 1; i++) {
+        draw::line(
+            lcd,
+            srect16(
+                WIDTH_PADDING + i,
+                y + HEIGHT_ENVELOPE - envelope_buffer[i],
+                WIDTH_PADDING + i + 1,
+                y + HEIGHT_ENVELOPE - envelope_buffer[i + 1]
+            ),
+            lcd_color::white
+        );
+    }
+
+    /* update cache */
+    memcpy(params_cached, params, sizeof(envelope_params_t));
+}
+
 static void display_task(void *pvParameters)
 {
     for(;;) {
         /* get oscillator params */
-        synth_get_params(&osc1_params, &osc2_params, &lfo_params, &synth_params);
+        synth_get_params(&osc1_params, &osc2_params, &lfo_params, &envelope_params, &synth_params);
         
         display_oscillator_params("OSC1", &osc1_params, &osc1_params_cached, WIDTH_PADDING, 20);
         display_oscillator_params("OSC2", &osc2_params, &osc2_params_cached, WIDTH_PADDING, 50);
         display_oscillator_params("LFO", &lfo_params, &lfo_params_cached, WIDTH_PADDING, 80);
         display_synth_params(&synth_params, &synth_params_cached, WIDTH_PADDING, 110);
+        display_envelope(&envelope_params, &envelope_params_cached, WIDTH_PADDING, 130);
 
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }

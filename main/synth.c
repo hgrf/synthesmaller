@@ -488,14 +488,52 @@ void synth_key_release(uint8_t key)
 }
 
 void synth_get_params(oscillator_params_t *osc1_params, oscillator_params_t *osc2_params,
-                        oscillator_params_t *lfo_params, synth_params_t *synth_params)
+                        oscillator_params_t *lfo_params, envelope_params_t *envelope_params,
+                        synth_params_t *synth_params)
 {
     xSemaphoreTake(m_osc_sem, portMAX_DELAY);
 
     memcpy(osc1_params, &m_osc1.params, sizeof(oscillator_params_t));
     memcpy(osc2_params, &m_osc2.params, sizeof(oscillator_params_t));
     memcpy(lfo_params, &m_lfo.params, sizeof(oscillator_params_t));
+    memcpy(envelope_params, &m_envelope.params, sizeof(envelope_params_t));
     memcpy(synth_params, &m_synth_params, sizeof(synth_params_t));
+
+    xSemaphoreGive(m_osc_sem);
+}
+
+void synth_map_envelope(uint8_t *buffer, uint16_t width, uint8_t height)
+{
+    xSemaphoreTake(m_osc_sem, portMAX_DELAY);
+
+    float sample;
+    int envelope_buffer_size = m_envelope.attack_decay_buffer_size + m_envelope.release_buffer_size;
+    /* calculate the steps by which we sample the envelope buffers;
+     * we leave 20% of the total width for a "sustain plateau"
+     */
+    int increment = envelope_buffer_size / (width - width / 5);
+    /* width of the "sustain plateau" in terms of envelope buffer
+     * samples
+     */
+    int sustain_plateau_width = increment * width / 5;
+    int offset = 0;
+
+    /* downsample the envelope buffers to fit into buffer */
+    for(int i = 0; i < width; i++) {
+        /* are we in the sustain plateau? */
+        if((offset >= m_envelope.attack_decay_buffer_size) &&
+            (offset < m_envelope.attack_decay_buffer_size + sustain_plateau_width)) {
+            sample = m_envelope.attack_decay_buffer[m_envelope.attack_decay_buffer_size - 1];
+        } else {
+            sample = (offset < m_envelope.attack_decay_buffer_size)
+                    ? m_envelope.attack_decay_buffer[offset]
+                    : m_envelope.release_buffer[offset - sustain_plateau_width - m_envelope.attack_decay_buffer_size];
+        }
+
+        buffer[i] = sample / m_envelope.params.amplitude * height;
+
+        offset += increment;
+    }
 
     xSemaphoreGive(m_osc_sem);
 }
