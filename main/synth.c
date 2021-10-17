@@ -231,7 +231,7 @@ static void oscillator_calculate_buffer(oscillator_t *osc)
     case WAVEFORM_SAWTOOTH:
         for(int i = 0; i < osc->buffer_size; i++)
             /* normalize with respect to sinus */
-            osc->buffer[i] = i * osc->params.amplitude * RMS_SINUS / RMS_SAWTOOTH / osc->buffer_size;
+            osc->buffer[i] = (- osc->params.amplitude + 2 * osc->params.amplitude * i / osc->buffer_size) * RMS_SINUS / RMS_SAWTOOTH;
         break;
     case WAVEFORM_SQUARE:
         for(int i = 0; i < osc->buffer_size / 2; i++)
