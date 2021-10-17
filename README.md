@@ -45,3 +45,7 @@
 ### Rotary encoder
 
 - https://github.com/DavidAntliff/esp32-rotary-encoder.git
+
+### Others
+
+- Guenther-Chiptune: https://www.youtube.com/watch?v=msIQIWeMnBE

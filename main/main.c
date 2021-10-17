@@ -9,6 +9,7 @@
 #include "sgtl5000.h"
 #include "midi_input.h"
 #include "synth.h"
+#include "display.h"
 
 #define MCLK_FREQ               (11289600)
 #define GPIO_NUM_MCLK           (23)
@@ -17,6 +18,12 @@ static const char *TAG = "APP";
 
 void app_main(void)
 {
+    init_display();
+
+    for(;;) {
+        vTaskDelay(1000);
+    }
+
     /* set up I2C bus */
     i2c_port_t i2c_master_port = 1;
     i2c_config_t conf = {
