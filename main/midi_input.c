@@ -50,13 +50,13 @@ static void midi_process_cc(uint8_t *midi_frame)
         synth_enable_osc2_sync(midi_frame[2]);
         break;
     case MIDI_CC_WF_OSC1:
-        synth_update_osc1_waveform(midi_frame[2] % 3);
+        synth_update_osc1_waveform((midi_frame[2] / 16) % 3);
         break;
     case MIDI_CC_WF_OSC2:
-        synth_update_osc2_waveform(midi_frame[2] % 3);
+        synth_update_osc2_waveform((midi_frame[2] / 16) % 3);
         break;
     case MIDI_CC_WF_LFO:
-        synth_update_lfo_waveform(midi_frame[2] % 3);
+        synth_update_lfo_waveform((midi_frame[2] / 16) % 3);
         break;
     }
 }
