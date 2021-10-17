@@ -39,7 +39,7 @@ void synth_key_press(uint8_t key, uint8_t velocity);
 void synth_key_release(uint8_t key);
 
 void synth_get_params(oscillator_params_t *osc1_params, oscillator_params_t *osc2_params,
-                        oscillator_params_t *lfo_params);
+                        oscillator_params_t *lfo_params, synth_params_t *synth_params);
 
 void synth_enable_lfo(uint8_t enabled);
 void synth_enable_osc2_sync(uint8_t enabled);

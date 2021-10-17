@@ -65,10 +65,15 @@ using lcd_color = color<typename lcd_type::pixel_type>;
 static oscillator_params_t osc1_params;
 static oscillator_params_t osc2_params;
 static oscillator_params_t lfo_params;
+static synth_params_t synth_params;
 
 static oscillator_params_t osc1_params_cached;
 static oscillator_params_t osc2_params_cached;
 static oscillator_params_t lfo_params_cached;
+static synth_params_t synth_params_cached = {
+    .lfo_enabled = true     // as a workaround, we set a different value here from what is in main.c
+                            // TODO: check if cache was initialized in the functions below
+};
 
 static void sketch_waveform(waveform_t waveform, int x, int y, int width, int amplitude, lcd_type::pixel_type color)
 {
@@ -100,6 +105,12 @@ static bool compare_osc_params(oscillator_params_t *params1, oscillator_params_t
     return (params1->amplitude == params2->amplitude) \
         && (params1->frequency == params2->frequency) \
         && (params1->waveform == params2->waveform);
+}
+
+static bool compare_synth_params(synth_params_t *params1, synth_params_t *params2)
+{
+    return (params1->lfo_enabled == params2->lfo_enabled) \
+        && (params1->osc2_sync_enabled == params2->osc2_sync_enabled);
 }
 
 static void display_oscillator_params(const char *oscillator_name, oscillator_params_t *params, oscillator_params_t *params_cached, int x, int y)
@@ -138,15 +149,39 @@ static void display_oscillator_params(const char *oscillator_name, oscillator_pa
     memcpy(params_cached, params, sizeof(oscillator_params_t));
 }
 
+static void display_synth_params(synth_params_t *params, synth_params_t *params_cached, int x, int y)
+{
+    char *synth_params_str;
+
+    /* check if parameters have changed */
+    if(compare_synth_params(params, params_cached) == true)
+        return;
+
+    /* clear the row */
+    draw::filled_rectangle(lcd, srect16(x, y - 10, lcd.dimensions().width - WIDTH_PADDING, y + 10), lcd_color::black);
+
+    /* draw string */
+    asprintf(&synth_params_str, "OSC2 sync: %s LFO: %s", // total length 23 characters
+        params->osc2_sync_enabled ? "ON " : "OFF",
+        params->lfo_enabled ? "ON ": "OFF"
+    );
+    draw::text(lcd, srect16(x, y - TEXT_HEIGHT / 2, x + 23 * FONT_DELTA_X, y + TEXT_HEIGHT / 2), (const char *) synth_params_str, FONT, lcd_color::white);
+    free(synth_params_str);
+
+    /* update cache */
+    memcpy(params_cached, params, sizeof(synth_params_t));
+}
+
 static void display_task(void *pvParameters)
 {
     for(;;) {
         /* get oscillator params */
-        synth_get_params(&osc1_params, &osc2_params, &lfo_params);
+        synth_get_params(&osc1_params, &osc2_params, &lfo_params, &synth_params);
         
         display_oscillator_params("OSC1", &osc1_params, &osc1_params_cached, WIDTH_PADDING, 20);
         display_oscillator_params("OSC2", &osc2_params, &osc2_params_cached, WIDTH_PADDING, 50);
         display_oscillator_params("LFO", &lfo_params, &lfo_params_cached, WIDTH_PADDING, 80);
+        display_synth_params(&synth_params, &synth_params_cached, WIDTH_PADDING, 110);
 
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
