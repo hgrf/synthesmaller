@@ -487,6 +487,15 @@ void synth_key_release(uint8_t key)
     xSemaphoreGive(m_osc_sem);
 }
 
+void synth_get_params(oscillator_params_t *osc1_params)
+{
+    xSemaphoreTake(m_osc_sem, portMAX_DELAY);
+
+    memcpy(osc1_params, &m_osc1.params, sizeof(oscillator_params_t));
+
+    xSemaphoreGive(m_osc_sem);
+}
+
 int synth_init(oscillator_params_t *osc1_params, oscillator_params_t *osc2_params,
                 oscillator_params_t *lfo_params, envelope_params_t *envelope_params,
                 synth_params_t *synth_params)

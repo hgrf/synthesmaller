@@ -15,6 +15,9 @@
 #include "stream.hpp"
 #include "gfx_color_cpp14.hpp"
 #include "../fonts/Bm437_ToshibaSat_9x14.h"
+
+#include "synth.h"
+
 using namespace espidf;
 using namespace io;
 using namespace gfx;
@@ -50,11 +53,7 @@ lcd_type lcd;
 
 using lcd_color = color<typename lcd_type::pixel_type>;
 
-typedef enum {
-    WAVEFORM_SINUS,
-    WAVEFORM_TRIANGLE,
-    WAVEFORM_SQUARE,
-} waveform_t;
+static oscillator_params_t osc1_params;
 
 void sketch_waveform(waveform_t waveform, int x, int y, int width, int amplitude, lcd_type::pixel_type color)
 {
@@ -66,10 +65,10 @@ void sketch_waveform(waveform_t waveform, int x, int y, int width, int amplitude
         draw::arc(lcd, srect16(x + width/2, y, x + 3*width/4, y + amplitude).flip_vertical(), color);
         draw::arc(lcd, srect16(x + 3*width/4, y + amplitude, x + width, y).flip_horizontal(), color);
         break;
-    case WAVEFORM_TRIANGLE:
-        draw::line(lcd, srect16(x, y, x + width/4, y - amplitude), color);
-        draw::line(lcd, srect16(x + width/4, y - amplitude, x + 3*width/4, y + amplitude), color);
-        draw::line(lcd, srect16(x + 3*width/4, y + amplitude, x + width, y), color);
+    case WAVEFORM_SAWTOOTH:
+        draw::line(lcd, srect16(x, y, x + width/2, y - amplitude), color);
+        draw::line(lcd, srect16(x + width/2, y - amplitude, x + width/2, y + amplitude), color);
+        draw::line(lcd, srect16(x + width/2, y + amplitude, x + width, y), color);
         break;
     case WAVEFORM_SQUARE:
         draw::line(lcd, srect16(x, y, x, y - amplitude), color);
@@ -101,7 +100,24 @@ void display_oscillator_params(const char *oscillator_name, waveform_t waveform,
     free(freq_str);
 }
 
-void init_display(void)
+void display_task(void *pvParameters)
+{
+    for(;;) {
+        /* get oscillator params */
+        synth_get_params(&osc1_params);
+
+        /* clear OSC1 params */
+        // TODO: here we could clear only the parameters that have been changed in order to
+        //       increase performace
+        draw::filled_rectangle(lcd, srect16(10, 10, 200, 30), lcd_color::black);
+
+        display_oscillator_params("OSC1", osc1_params.waveform, osc1_params.frequency, 10, 20);
+
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+
+void display_init(void)
 {
     // check to make sure SPI was initialized successfully
     if(!spi_host.initialized()) {
@@ -109,11 +125,8 @@ void init_display(void)
         abort();
     }
 
-    draw::filled_rectangle(lcd, (srect16) lcd.bounds(), lcd_color::black);
+    /* draw gray background */
+    draw::filled_rectangle(lcd, (srect16) lcd.bounds(), lcd_color::gray);
 
-    for(int i = 0; i < 3; i++) {
-        //sketch_waveform((waveform_t) i, 0, 20 + i * 30, 40, 10, lcd_color::white);
-        const char *name = "OSC1";
-        display_oscillator_params(name, (waveform_t) i, 100.0, 10, 20 + i * 30);
-    }
+    xTaskCreatePinnedToCore(display_task, "display_task", 4096, NULL, 1, NULL, 0);
 }

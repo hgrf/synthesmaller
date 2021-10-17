@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     WAVEFORM_SINUS,
     WAVEFORM_SAWTOOTH,
@@ -34,6 +38,8 @@ int synth_init(oscillator_params_t *osc1_params, oscillator_params_t *osc2_param
 void synth_key_press(uint8_t key, uint8_t velocity);
 void synth_key_release(uint8_t key);
 
+void synth_get_params(oscillator_params_t *osc1_params);
+
 void synth_enable_lfo(uint8_t enabled);
 void synth_enable_osc2_sync(uint8_t enabled);
 
@@ -44,5 +50,9 @@ void synth_update_osc2_amp(float amp);
 void synth_update_osc2_waveform(waveform_t wf);
 void synth_update_lfo_freq(float freq);
 void synth_update_lfo_waveform(waveform_t wf);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SYNTH_H

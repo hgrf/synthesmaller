@@ -18,8 +18,6 @@ static const char *TAG = "APP";
 
 void app_main(void)
 {
-    init_display();
-
     /* set up I2C bus */
     i2c_port_t i2c_master_port = 1;
     i2c_config_t conf = {
@@ -87,6 +85,8 @@ void app_main(void)
         .osc2_sync_enabled = 0,
     };
     synth_init(&osc1_params, &osc2_params, &lfo_params, &envelope_params, &synth_params);
+
+    display_init();
 
     midi_init();
     midi_loop();

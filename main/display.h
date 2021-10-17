@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void init_display();
+    void display_init();
 #ifdef __cplusplus
 }
 #endif
