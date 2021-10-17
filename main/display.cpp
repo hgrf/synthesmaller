@@ -54,6 +54,8 @@ lcd_type lcd;
 using lcd_color = color<typename lcd_type::pixel_type>;
 
 static oscillator_params_t osc1_params;
+static oscillator_params_t osc2_params;
+static oscillator_params_t lfo_params;
 
 void sketch_waveform(waveform_t waveform, int x, int y, int width, int amplitude, lcd_type::pixel_type color)
 {
@@ -104,16 +106,21 @@ void display_task(void *pvParameters)
 {
     for(;;) {
         /* get oscillator params */
-        synth_get_params(&osc1_params);
+        synth_get_params(&osc1_params, &osc2_params, &lfo_params);
 
         /* clear OSC1 params */
         // TODO: here we could clear only the parameters that have been changed in order to
         //       increase performace
         draw::filled_rectangle(lcd, srect16(10, 10, 200, 30), lcd_color::black);
-
         display_oscillator_params("OSC1", osc1_params.waveform, osc1_params.frequency, 10, 20);
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        draw::filled_rectangle(lcd, srect16(10, 40, 200, 60), lcd_color::black);
+        display_oscillator_params("OSC2", osc2_params.waveform, osc2_params.frequency, 10, 50);
+
+        draw::filled_rectangle(lcd, srect16(10, 70, 200, 90), lcd_color::black);
+        display_oscillator_params("LFO ", lfo_params.waveform, lfo_params.frequency, 10, 80);
+
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
