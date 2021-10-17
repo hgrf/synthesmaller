@@ -86,7 +86,7 @@ void sketch_waveform(waveform_t waveform, int x, int y, int width, int amplitude
     }
 }
 
-void display_oscillator_params(const char *oscillator_name, waveform_t waveform, float frequency, int x, int y)
+void display_oscillator_params(const char *oscillator_name, oscillator_params_t *params, int x, int y)
 {
     /* draw oscillator name */
     const font& f = Bm437_ToshibaSat_9x14_FON;
@@ -95,11 +95,11 @@ void display_oscillator_params(const char *oscillator_name, waveform_t waveform,
     draw::text(lcd, text_rect, oscillator_name, f, lcd_color::white);
 
     /* sketch waveform */
-    sketch_waveform(waveform, x + text_rect.width() + 10, y, 28, text_rect.height() / 2, lcd_color::white);
+    sketch_waveform(params->waveform, x + text_rect.width() + 10, y, 28, text_rect.height() / 2, lcd_color::white);
 
     /* draw frequency */
     char *freq_str;
-    asprintf(&freq_str, "%.1f Hz", frequency);
+    asprintf(&freq_str, "%.1f Hz", params->frequency);
     text_rect = srect16(spoint16(0, 0), f.measure_text((ssize16) lcd.dimensions(), (const char *) freq_str));
     text_rect = text_rect.offset(x + 90, y - text_rect.height() / 2);
     draw::text(lcd, text_rect, (const char *) freq_str, f, lcd_color::white);
@@ -121,19 +121,19 @@ void display_task(void *pvParameters)
 
         if(compare_osc_params(&osc1_params, &osc1_params_cached) == false) {
             draw::filled_rectangle(lcd, srect16(10, 10, 200, 30), lcd_color::black);
-            display_oscillator_params("OSC1", osc1_params.waveform, osc1_params.frequency, 10, 20);
+            display_oscillator_params("OSC1", &osc1_params, 10, 20);
             memcpy(&osc1_params_cached, &osc1_params, sizeof(oscillator_params_t));
         }
 
         if(compare_osc_params(&osc2_params, &osc2_params_cached) == false) {
             draw::filled_rectangle(lcd, srect16(10, 40, 200, 60), lcd_color::black);
-            display_oscillator_params("OSC2", osc2_params.waveform, osc2_params.frequency, 10, 50);
+            display_oscillator_params("OSC2", &osc2_params, 10, 50);
             memcpy(&osc2_params_cached, &osc2_params, sizeof(oscillator_params_t));
         }
 
         if(compare_osc_params(&lfo_params, &lfo_params_cached) == false) {
             draw::filled_rectangle(lcd, srect16(10, 70, 200, 90), lcd_color::black);
-            display_oscillator_params("LFO ", lfo_params.waveform, lfo_params.frequency, 10, 80);
+            display_oscillator_params("LFO ", &lfo_params, 10, 80);
             memcpy(&lfo_params_cached, &lfo_params, sizeof(oscillator_params_t));
         }
 
