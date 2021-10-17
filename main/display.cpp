@@ -57,6 +57,10 @@ static oscillator_params_t osc1_params;
 static oscillator_params_t osc2_params;
 static oscillator_params_t lfo_params;
 
+static oscillator_params_t osc1_params_cached;
+static oscillator_params_t osc2_params_cached;
+static oscillator_params_t lfo_params_cached;
+
 void sketch_waveform(waveform_t waveform, int x, int y, int width, int amplitude, lcd_type::pixel_type color)
 {
     switch(waveform) {
@@ -102,23 +106,36 @@ void display_oscillator_params(const char *oscillator_name, waveform_t waveform,
     free(freq_str);
 }
 
+bool compare_osc_params(oscillator_params_t *params1, oscillator_params_t *params2)
+{
+    return (params1->amplitude == params2->amplitude) \
+        && (params1->frequency == params2->frequency) \
+        && (params1->waveform == params2->waveform);
+}
+
 void display_task(void *pvParameters)
 {
     for(;;) {
         /* get oscillator params */
         synth_get_params(&osc1_params, &osc2_params, &lfo_params);
 
-        /* clear OSC1 params */
-        // TODO: here we could clear only the parameters that have been changed in order to
-        //       increase performace
-        draw::filled_rectangle(lcd, srect16(10, 10, 200, 30), lcd_color::black);
-        display_oscillator_params("OSC1", osc1_params.waveform, osc1_params.frequency, 10, 20);
+        if(compare_osc_params(&osc1_params, &osc1_params_cached) == false) {
+            draw::filled_rectangle(lcd, srect16(10, 10, 200, 30), lcd_color::black);
+            display_oscillator_params("OSC1", osc1_params.waveform, osc1_params.frequency, 10, 20);
+            memcpy(&osc1_params_cached, &osc1_params, sizeof(oscillator_params_t));
+        }
 
-        draw::filled_rectangle(lcd, srect16(10, 40, 200, 60), lcd_color::black);
-        display_oscillator_params("OSC2", osc2_params.waveform, osc2_params.frequency, 10, 50);
+        if(compare_osc_params(&osc2_params, &osc2_params_cached) == false) {
+            draw::filled_rectangle(lcd, srect16(10, 40, 200, 60), lcd_color::black);
+            display_oscillator_params("OSC2", osc2_params.waveform, osc2_params.frequency, 10, 50);
+            memcpy(&osc2_params_cached, &osc2_params, sizeof(oscillator_params_t));
+        }
 
-        draw::filled_rectangle(lcd, srect16(10, 70, 200, 90), lcd_color::black);
-        display_oscillator_params("LFO ", lfo_params.waveform, lfo_params.frequency, 10, 80);
+        if(compare_osc_params(&lfo_params, &lfo_params_cached) == false) {
+            draw::filled_rectangle(lcd, srect16(10, 70, 200, 90), lcd_color::black);
+            display_oscillator_params("LFO ", lfo_params.waveform, lfo_params.frequency, 10, 80);
+            memcpy(&lfo_params_cached, &lfo_params, sizeof(oscillator_params_t));
+        }
 
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
