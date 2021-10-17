@@ -19,6 +19,10 @@
 #define MIDI_CC_WF_OSC1             (0x4e)
 #define MIDI_CC_WF_OSC2             (0x4f)
 #define MIDI_CC_WF_LFO              (0x5b)
+#define MIDI_CC_ENV_ATTACK          (0x5d)
+#define MIDI_CC_ENV_DECAY           (0x5e)
+#define MIDI_CC_ENV_SUSTAIN         (0x0a)
+#define MIDI_CC_ENV_RELEASE         (0x5c)
 
 #define MIDI_UART_BAUDRATE      (31250)
 #define UART_BUFFER_SIZE        (1024 * 2)
@@ -57,6 +61,22 @@ static void midi_process_cc(uint8_t *midi_frame)
         break;
     case MIDI_CC_WF_LFO:
         synth_update_lfo_waveform((midi_frame[2] / 16) % 3);
+        break;
+    case MIDI_CC_ENV_ATTACK:
+        /* map the MIDI value (0...127) to an attack time between 0.01 and 1 s */
+        synth_update_env_attack(0.01 + (float) midi_frame[2] * 0.99 / 127.0);
+        break;
+    case MIDI_CC_ENV_DECAY:
+        /* map the MIDI value (0...127) to a decay time between 0.01 and 1 s */
+        synth_update_env_decay(0.01 + (float) midi_frame[2] * 0.99 / 127.0);
+        break;
+    case MIDI_CC_ENV_SUSTAIN:
+        /* map the MIDI value (0...127) to a sustain value between 0 and 100 % */
+        synth_update_env_sustain((float) midi_frame[2] / 127.0);
+        break;
+    case MIDI_CC_ENV_RELEASE:
+        /* map the MIDI value (0...127) to a release time between 0.01 and 1 s */
+        synth_update_env_release(0.01 + (float) midi_frame[2] * 0.99 / 127.0);
         break;
     }
 }

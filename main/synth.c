@@ -432,6 +432,54 @@ void synth_update_lfo_waveform(waveform_t wf)
     synth_update_waveform(&m_lfo, wf);
 }
 
+void synth_update_env_attack(float attack)
+{
+    envelope_params_t params;
+
+    printf("Updating envelope attack: %.2f s\n", attack);
+    
+    // TODO: same issue as in synth_key_press()
+    memcpy(&params, &m_envelope.params, sizeof(envelope_params_t));
+    params.attack = attack;
+    envelope_update(&m_envelope, &params);    
+}
+
+void synth_update_env_decay(float decay)
+{
+    envelope_params_t params;
+
+    printf("Updating envelope decay: %.2f s\n", decay);
+    
+    // TODO: same issue as in synth_key_press()
+    memcpy(&params, &m_envelope.params, sizeof(envelope_params_t));
+    params.decay = decay;
+    envelope_update(&m_envelope, &params);    
+}
+
+void synth_update_env_sustain(float sustain)
+{
+    envelope_params_t params;
+
+    printf("Updating envelope sustain: %.2f %%\n", sustain);
+    
+    // TODO: same issue as in synth_key_press()
+    memcpy(&params, &m_envelope.params, sizeof(envelope_params_t));
+    params.sustain = sustain;
+    envelope_update(&m_envelope, &params);    
+}
+
+void synth_update_env_release(float release)
+{
+    envelope_params_t params;
+
+    printf("Updating envelope release: %.2f s\n", release);
+    
+    // TODO: same issue as in synth_key_press()
+    memcpy(&params, &m_envelope.params, sizeof(envelope_params_t));
+    params.release = release;
+    envelope_update(&m_envelope, &params);    
+}
+
 void synth_enable_lfo(uint8_t enabled)
 {
     xSemaphoreTake(m_osc_sem, portMAX_DELAY);

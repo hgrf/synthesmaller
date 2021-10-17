@@ -54,6 +54,10 @@ void synth_update_osc2_amp(float amp);
 void synth_update_osc2_waveform(waveform_t wf);
 void synth_update_lfo_freq(float freq);
 void synth_update_lfo_waveform(waveform_t wf);
+void synth_update_env_attack(float attack);
+void synth_update_env_decay(float decay);
+void synth_update_env_sustain(float sustain);
+void synth_update_env_release(float release);
 
 #ifdef __cplusplus
 }
