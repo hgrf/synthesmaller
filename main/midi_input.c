@@ -5,6 +5,7 @@
 
 #include "midi_input.h"
 #include "synth.h"
+#include "pinout.h"
 
 #define MIDI_SB_CONTROL_CHANGE  (0b1011 << 4)
 #define MIDI_SB_NOTE_ON         (0b1001 << 4)
@@ -19,7 +20,6 @@
 #define MIDI_CC_WF_OSC2             (0x4f)
 #define MIDI_CC_WF_LFO              (0x5b)
 
-#define MIDI_UART_RX_GPIO       (16)
 #define MIDI_UART_BAUDRATE      (31250)
 #define UART_BUFFER_SIZE        (1024 * 2)
 

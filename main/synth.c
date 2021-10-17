@@ -1,4 +1,5 @@
 #include "synth.h"
+#include "pinout.h"
 
 #include <math.h>
 #include <string.h>
@@ -20,9 +21,6 @@ static const char *TAG = "SYNTH";
 #define I2S_NUM                 (0)
 #define CHANNEL_COUNT           (2)
 #define SAMPLING_FREQ           (44100)
-#define GPIO_NUM_BCLK           (4)
-#define GPIO_NUM_WCLK           (5)
-#define GPIO_NUM_DOUT           (18)
 
 #define TIME_STEP                   (1.0 / SAMPLING_FREQ)
 #define BUFFER_SAMPLES_PER_CHANNEL  ((uint32_t) (BUFFER_TIME / TIME_STEP))

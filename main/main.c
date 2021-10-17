@@ -10,9 +10,9 @@
 #include "midi_input.h"
 #include "synth.h"
 #include "display.h"
+#include "pinout.h"
 
 #define MCLK_FREQ               (11289600)
-#define GPIO_NUM_MCLK           (23)
 
 static const char *TAG = "APP";
 
@@ -20,17 +20,13 @@ void app_main(void)
 {
     init_display();
 
-    for(;;) {
-        vTaskDelay(1000);
-    }
-
     /* set up I2C bus */
     i2c_port_t i2c_master_port = 1;
     i2c_config_t conf = {
         .mode = I2C_MODE_MASTER,
-        .sda_io_num = 21,
+        .sda_io_num = GPIO_NUM_SDA,
         .sda_pullup_en = GPIO_PULLUP_ENABLE,        /* From I2C driver datasheet; internal pull-up may not be sufficient */
-        .scl_io_num = 22,
+        .scl_io_num = GPIO_NUM_SCL,
         .scl_pullup_en = GPIO_PULLUP_ENABLE,
         .master = {
             .clk_speed = 100000

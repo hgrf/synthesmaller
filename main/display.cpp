@@ -1,4 +1,5 @@
 #include "display.h"
+#include "pinout.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,20 +18,10 @@
 using namespace espidf;
 using namespace io;
 using namespace gfx;
-// the following is configured for the ESP-WROVER-KIT
-// make sure to set the pins to your set up.
+
 #define LCD_ILI9341
 #define PARALLEL_LINES 16
-#define LCD_HOST    HSPI_HOST
 #define DMA_CHAN    2
-#define PIN_NUM_MISO GPIO_NUM_25
-#define PIN_NUM_MOSI GPIO_NUM_23
-#define PIN_NUM_CLK  GPIO_NUM_19
-#define PIN_NUM_CS   GPIO_NUM_22
-
-#define PIN_NUM_DC   GPIO_NUM_21
-#define PIN_NUM_RST  GPIO_NUM_18
-#define PIN_NUM_BCKL GPIO_NUM_5
 
 // To speed up transfers, every SPI transfer sends as much data as possible. 
 
