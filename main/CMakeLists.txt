@@ -6,6 +6,7 @@ idf_component_register(
                     "synth.c"
                     "midi_input.c"
                     "display.cpp"
+                    "preset.c"
     INCLUDE_DIRS    "${CMAKE_SOURCE_DIR}/gfx/src"
                     "${CMAKE_SOURCE_DIR}/ili9341"
 )

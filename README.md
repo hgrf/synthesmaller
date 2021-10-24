@@ -19,7 +19,6 @@
 - add more voices
 - add simple sequencer
 - add noise
-- implement saving and restoring of presets
 - add filters
 
 ## References
@@ -34,6 +33,7 @@
   - https://github.com/IoTBits/ESP32_SGTL5000_driver/
   - https://github.com/macaba/ESP32Audio
 - What does capless mean: https://www.electronicproducts.com/design-considerations-for-driving-headphones/
+- example for a GPIO expander with ADCs (for controls): MAX11603EEE
 
 ### MIDI
 

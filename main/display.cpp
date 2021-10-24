@@ -16,6 +16,7 @@
 #include "gfx_color_cpp14.hpp"
 #include "../fonts/Bm437_ToshibaSat_9x14.h"
 
+#include "preset.h"
 #include "synth.h"
 
 using namespace espidf;
@@ -80,6 +81,8 @@ static synth_params_t synth_params_cached = {
 static envelope_params_t envelope_params;
 static envelope_params_t envelope_params_cached;
 static uint8_t envelope_buffer[WIDTH_ENVELOPE];
+
+static int preset_index_cached;
 
 static void sketch_waveform(waveform_t waveform, int x, int y, int width, int amplitude, lcd_type::pixel_type color)
 {
@@ -241,17 +244,58 @@ static void display_envelope(envelope_params_t *params, envelope_params_t *param
     memcpy(params_cached, params, sizeof(envelope_params_t));
 }
 
+static void display_preset(int *index, int *index_cached, int x, int y)
+{
+    char *preset_str;
+
+    /* check if parameters have changed */
+    if(*index == *index_cached)
+        return;
+
+
+    draw::filled_rectangle(
+        lcd,
+        srect16(
+            x,
+            y + 10,
+            x + 2 * FONT_DELTA_X + WIDTH_PADDING,
+            y + 30
+        ),
+        lcd_color::black
+    );
+    asprintf(&preset_str, "P%d", *index);
+    draw::text(
+        lcd,
+        srect16(
+            x,
+            y + 20 - TEXT_HEIGHT / 2,
+            x + WIDTH_ENVELOPE,
+            y + 20 + TEXT_HEIGHT / 2
+        ),
+        (const char *) preset_str,
+        FONT,
+        lcd_color::white
+    );
+    free(preset_str);
+
+    *index_cached = *index;
+}
+
 static void display_task(void *pvParameters)
 {
+    int preset_index;
+
     for(;;) {
         /* get oscillator params */
         synth_get_params(&osc1_params, &osc2_params, &lfo_params, &envelope_params, &synth_params);
+        preset_index = preset_get_current_index();
         
         display_oscillator_params("OSC1", &osc1_params, &osc1_params_cached, WIDTH_PADDING, 20);
         display_oscillator_params("OSC2", &osc2_params, &osc2_params_cached, WIDTH_PADDING, 50);
         display_oscillator_params("LFO", &lfo_params, &lfo_params_cached, WIDTH_PADDING, 80);
         display_synth_params(&synth_params, &synth_params_cached, WIDTH_PADDING, 110);
         display_envelope(&envelope_params, &envelope_params_cached, WIDTH_PADDING, 130);
+        display_preset(&preset_index, &preset_index_cached, WIDTH_PADDING + WIDTH_ENVELOPE + WIDTH_PADDING, 130);
 
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }

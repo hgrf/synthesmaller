@@ -1,5 +1,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_spiffs.h"
 #include "esp_system.h"
 #include "esp_log.h"
 
@@ -18,6 +19,17 @@ static const char *TAG = "APP";
 
 void app_main(void)
 {
+    /* set up SPIFFS */
+    esp_err_t ret;
+    esp_vfs_spiffs_conf_t spiffs_conf = {
+        .base_path = "/spiffs",
+        .format_if_mount_failed = true,
+        .max_files = 5,
+        .partition_label = "storage",
+    };
+    ret = esp_vfs_spiffs_register(&spiffs_conf);
+    ESP_ERROR_CHECK(ret);   
+
     /* set up I2C bus */
     i2c_port_t i2c_master_port = 1;
     i2c_config_t conf = {

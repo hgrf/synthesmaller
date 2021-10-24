@@ -6,6 +6,7 @@
 #include "midi_input.h"
 #include "synth.h"
 #include "pinout.h"
+#include "preset.h"
 
 #define MIDI_SB_CONTROL_CHANGE  (0b1011 << 4)
 #define MIDI_SB_NOTE_ON         (0b1001 << 4)
@@ -23,6 +24,8 @@
 #define MIDI_CC_ENV_DECAY           (0x5e)
 #define MIDI_CC_ENV_SUSTAIN         (0x0a)
 #define MIDI_CC_ENV_RELEASE         (0x5c)
+#define MIDI_CC_SELECT_PRESET       (0x07)
+#define MIDI_CC_SAVE_PRESET         (0x46)
 
 #define MIDI_UART_BAUDRATE      (31250)
 #define UART_BUFFER_SIZE        (1024 * 2)
@@ -77,6 +80,13 @@ static void midi_process_cc(uint8_t *midi_frame)
     case MIDI_CC_ENV_RELEASE:
         /* map the MIDI value (0...127) to a release time between 0.01 and 1 s */
         synth_update_env_release(0.01 + (float) midi_frame[2] * 0.99 / 127.0);
+        break;
+    case MIDI_CC_SELECT_PRESET:
+        /* map the MIDI value (0...127) to a preset value (0...6) */
+        preset_select(midi_frame[2] / 20);
+        break;
+    case MIDI_CC_SAVE_PRESET:
+        preset_save();
         break;
     }
 }

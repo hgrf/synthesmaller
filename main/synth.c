@@ -341,7 +341,7 @@ static float frequency_from_key(uint8_t key)
     return 440.0 * pow(2.0, ((m - 69.0) / 12.0));
 }
 
-static void synth_update(oscillator_params_t *osc1_params, oscillator_params_t *osc2_params,
+void synth_update(oscillator_params_t *osc1_params, oscillator_params_t *osc2_params,
                             oscillator_params_t *lfo_params, envelope_params_t *envelope_params,
                             synth_params_t *synth_params)
 {
