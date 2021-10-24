@@ -1,3 +1,10 @@
+## Reading out the presets from the command line
+
+    esptool.py --chip esp32 --port [port] --baud 921600 read_flash 0x210000 0x1f0000 spiffs.bin
+    mkspiffs -u spiffs/ spiffs.bin
+
+NOTE: You can get `mkspiffs` from https://github.com/igrr/mkspiffs.
+
 ## TODO
 
 - display: show sustain plateau as dashed / dotted line
