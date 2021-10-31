@@ -24,6 +24,7 @@ MIDI_CC_ENV_RELEASE        = (0x5c)
 MIDI_CC_SELECT_PRESET      = (0x07)
 MIDI_CC_SAVE_PRESET        = (0x46)
 MIDI_CC_DUMP_PARAMS        = (0x42)
+MIDI_CC_NOISE_AMP          = (0x43)
 
 
 class GUI(QWidget):
@@ -47,7 +48,7 @@ class GUI(QWidget):
         # set up sliders
         for cc in [MIDI_CC_LFO_FREQ, MIDI_CC_OSC2_AMP, MIDI_CC_OSC2_FREQ,
                 MIDI_CC_ENV_ATTACK, MIDI_CC_ENV_DECAY, MIDI_CC_ENV_SUSTAIN,
-                MIDI_CC_ENV_RELEASE]:
+                MIDI_CC_ENV_RELEASE, MIDI_CC_NOISE_AMP]:
             self.add_control(cc, SliderWidget())
 
         # set up toggle buttons
@@ -96,9 +97,13 @@ class GUI(QWidget):
         layout.addWidget(QLabel("Release"), 1, 7)
         layout.addWidget(self.cc_map[MIDI_CC_ENV_RELEASE], 2, 7)
 
-        layout.addWidget(QLabel("<b>Presets</b>"), 0, 8)
-        layout.addWidget(self.cc_map[MIDI_CC_SELECT_PRESET], 2, 8)
-        layout.addWidget(self.cc_map[MIDI_CC_SAVE_PRESET], 3, 8)
+        layout.addWidget(QLabel("<b>Noise</b>"), 0, 8)
+        layout.addWidget(QLabel("Amp"), 1, 8)
+        layout.addWidget(self.cc_map[MIDI_CC_NOISE_AMP], 2, 8)
+
+        layout.addWidget(QLabel("<b>Presets</b>"), 0, 9)
+        layout.addWidget(self.cc_map[MIDI_CC_SELECT_PRESET], 2, 9)
+        layout.addWidget(self.cc_map[MIDI_CC_SAVE_PRESET], 3, 9)
 
         self.setLayout(layout)
 

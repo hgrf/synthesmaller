@@ -124,7 +124,8 @@ static void synth_calculate_buffer(void)
             * lfo_val
             * (
                 m_osc1.buffer[((m_buf.offset + i) / m_osc1.downsampling_factor) % m_osc1.buffer_size] +
-                osc2_val
+                osc2_val + 
+                (float) esp_random() / 0xFFFFFFFF * m_synth_params.noise_amplitude
             )
         );
     }
@@ -478,6 +479,15 @@ void synth_update_env_release(float release)
     memcpy(&params, &m_envelope.params, sizeof(envelope_params_t));
     params.release = release;
     envelope_update(&m_envelope, &params);    
+}
+
+void synth_update_noise_amp(float amp)
+{
+    xSemaphoreTake(m_osc_sem, portMAX_DELAY);
+
+    m_synth_params.noise_amplitude = amp;
+
+    xSemaphoreGive(m_osc_sem);
 }
 
 void synth_enable_lfo(uint8_t enabled)

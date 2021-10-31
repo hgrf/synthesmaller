@@ -95,6 +95,7 @@ void app_main(void)
     synth_params_t synth_params = {
         .lfo_enabled = 0,
         .osc2_sync_enabled = 0,
+        .noise_amplitude = 0.0,
     };
     synth_init(&osc1_params, &osc2_params, &lfo_params, &envelope_params, &synth_params);
 

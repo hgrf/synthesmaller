@@ -27,6 +27,7 @@
 #define MIDI_CC_SELECT_PRESET       (0x07)
 #define MIDI_CC_SAVE_PRESET         (0x46)
 #define MIDI_CC_DUMP_PARAMS         (0x42)
+#define MIDI_CC_NOISE_AMP           (0x43)
 
 #define MIDI_UART_BAUDRATE      (31250)
 #define UART_BUFFER_SIZE        (1024 * 2)
@@ -54,6 +55,7 @@ static void dump_params(void)
     printf("%02X:%02X\n", MIDI_CC_ENV_DECAY, (uint8_t) ((envelope_params.decay - 0.01) / 0.99 * 127.0));
     printf("%02X:%02X\n", MIDI_CC_ENV_SUSTAIN, (uint8_t) (envelope_params.sustain * 127.0));
     printf("%02X:%02X\n", MIDI_CC_ENV_RELEASE, (uint8_t) ((envelope_params.release - 0.01) / 0.99 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_NOISE_AMP, (uint8_t) (synth_params.noise_amplitude / 15000.0 * 127.0));
     printf("MIDI_VALUES_END\n");
 }
 
@@ -103,6 +105,10 @@ static void midi_process_cc(uint8_t *midi_frame)
     case MIDI_CC_ENV_RELEASE:
         /* map the MIDI value (0...127) to a release time between 0.01 and 1 s */
         synth_update_env_release(0.01 + (float) midi_frame[2] * 0.99 / 127.0);
+        break;
+    case MIDI_CC_NOISE_AMP:
+        /* map the MIDI value (0...127) to an amplitude between 0 and 15000 */
+        synth_update_noise_amp((float) midi_frame[2] * 15000.0 / 127.0);
         break;
     case MIDI_CC_SELECT_PRESET:
         /* map the MIDI value (0...127) to a preset value (0...6) */

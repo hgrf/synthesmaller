@@ -30,6 +30,7 @@ typedef struct {
 typedef struct {
     uint8_t lfo_enabled;
     uint8_t osc2_sync_enabled;
+    float noise_amplitude;
 } synth_params_t;
 
 int synth_init(oscillator_params_t *osc1_params, oscillator_params_t *osc2_params,
@@ -61,6 +62,7 @@ void synth_update_env_attack(float attack);
 void synth_update_env_decay(float decay);
 void synth_update_env_sustain(float sustain);
 void synth_update_env_release(float release);
+void synth_update_noise_amp(float amp);
 
 #ifdef __cplusplus
 }
