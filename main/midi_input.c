@@ -26,9 +26,36 @@
 #define MIDI_CC_ENV_RELEASE         (0x5c)
 #define MIDI_CC_SELECT_PRESET       (0x07)
 #define MIDI_CC_SAVE_PRESET         (0x46)
+#define MIDI_CC_DUMP_PARAMS         (0x42)
 
 #define MIDI_UART_BAUDRATE      (31250)
 #define UART_BUFFER_SIZE        (1024 * 2)
+
+static oscillator_params_t osc1_params;
+static oscillator_params_t osc2_params;
+static oscillator_params_t lfo_params;
+static envelope_params_t envelope_params;
+static synth_params_t synth_params;
+
+static void dump_params(void)
+{
+    synth_get_params(&osc1_params, &osc2_params, &lfo_params, &envelope_params, &synth_params);
+
+    printf("MIDI_VALUES_START\n");
+    printf("%02X:%02X\n", MIDI_CC_OSC2_FREQ, (uint8_t) ((osc2_params.amplitude - 100.0) / 1900.0 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_OSC2_AMP, (uint8_t) (osc2_params.frequency / 15000.0 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_LFO_FREQ, (uint8_t) ((lfo_params.frequency - 0.1) / 19.9 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_LFO_ON_OFF, (uint8_t) synth_params.lfo_enabled);
+    printf("%02X:%02X\n", MIDI_CC_OSC2_SYNC_ON_OFF, (uint8_t) synth_params.osc2_sync_enabled);
+    printf("%02X:%02X\n", MIDI_CC_WF_OSC1, (uint8_t) (osc1_params.waveform * 16));
+    printf("%02X:%02X\n", MIDI_CC_WF_OSC2, (uint8_t) (osc2_params.waveform * 16));
+    printf("%02X:%02X\n", MIDI_CC_WF_LFO, (uint8_t) (lfo_params.waveform * 16));
+    printf("%02X:%02X\n", MIDI_CC_ENV_ATTACK, (uint8_t) ((envelope_params.attack - 0.01) / 0.99 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_ENV_DECAY, (uint8_t) ((envelope_params.decay - 0.01) / 0.99 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_ENV_SUSTAIN, (uint8_t) (envelope_params.sustain * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_ENV_RELEASE, (uint8_t) ((envelope_params.release - 0.01) / 0.99 * 127.0));
+    printf("MIDI_VALUES_END\n");
+}
 
 static void midi_process_cc(uint8_t *midi_frame)
 {
@@ -83,6 +110,9 @@ static void midi_process_cc(uint8_t *midi_frame)
         break;
     case MIDI_CC_SAVE_PRESET:
         preset_save();
+        break;
+    case MIDI_CC_DUMP_PARAMS:
+        dump_params();
         break;
     }
 }
