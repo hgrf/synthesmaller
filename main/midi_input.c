@@ -30,10 +30,6 @@
 #define MIDI_UART_BAUDRATE      (31250)
 #define UART_BUFFER_SIZE        (1024 * 2)
 
-const uart_port_t uart_num = UART_NUM_2;
-
-static QueueHandle_t uart_queue;
-
 static void midi_process_cc(uint8_t *midi_frame)
 {
     printf("Control change: %02X = %02X\n", midi_frame[1], midi_frame[2]);
@@ -110,49 +106,58 @@ static void midi_process_frame(uint8_t *midi_frame)
     }
 }
 
+static void midi_poll_uart(uart_port_t uart_num, uint8_t *midi_frame)
+{
+    size_t length;
+    uint8_t first_byte;
+
+    ESP_ERROR_CHECK(uart_get_buffered_data_len(uart_num, &length));
+
+    if(length > 0) {
+        uart_read_bytes(uart_num, &first_byte, 1, 100);
+
+        /* ignore active sense
+         * http://midi.teragonaudio.com/tech/midispec/sense.htm
+         */
+        if(first_byte == 0xfe) {
+            return;
+        }
+
+        /* if the first byte is not a status byte, read only
+         * one more byte and keep the previous status byte
+         * (see "running status", e.g. in
+         * https://www.cs.cmu.edu/~music/cmsip/readings/Standard-MIDI-file-format-updated.pdf)
+         */
+        if((first_byte & 0b10000000) == 0) {
+            midi_frame[1] = first_byte;
+            uart_read_bytes(uart_num, &midi_frame[2], 1, 100);
+        } else {
+            midi_frame[0] = first_byte;
+            /* read rest of a 3 byte MIDI frame */
+            uart_read_bytes(uart_num, &midi_frame[1], 2, 100);
+        }
+
+        /* print MIDI frame */
+        for(int i = 0; i < 3; i++) {
+            printf("%02X ", midi_frame[i]);
+        }
+        printf("\n");
+        midi_process_frame(midi_frame);
+    }
+}
+
 // #define BPM                 (120)
 // #define NOTE_DURATION_MS    (1000 * 60 / BPM)
 
 void midi_loop(void)
 {
-    int length;
-    uint8_t first_byte;
-    uint8_t midi_frame[3];
+    uint8_t midi_frame_uart0[3] = {0};
+    uint8_t midi_frame_uart2[3] = {0};
 
     for(;;) {
-        ESP_ERROR_CHECK(uart_get_buffered_data_len(uart_num, (size_t*)&length));
+        midi_poll_uart(UART_NUM_0, midi_frame_uart0);
+        midi_poll_uart(UART_NUM_2, midi_frame_uart2);
 
-        if(length > 0) {
-            uart_read_bytes(uart_num, &first_byte, 1, 100);
-
-            /* ignore active sense
-             * http://midi.teragonaudio.com/tech/midispec/sense.htm
-             */
-            if(first_byte == 0xfe) {
-                continue;
-            }
-
-            /* if the first byte is not a status byte, read only
-             * one more byte and keep the previous status byte
-             * (see "running status", e.g. in
-             * https://www.cs.cmu.edu/~music/cmsip/readings/Standard-MIDI-file-format-updated.pdf)
-             */
-            if((first_byte & 0b10000000) == 0) {
-                midi_frame[1] = first_byte;
-                uart_read_bytes(uart_num, &midi_frame[2], 1, 100);
-            } else {
-                midi_frame[0] = first_byte;
-                /* read rest of a 3 byte MIDI frame */
-                uart_read_bytes(uart_num, &midi_frame[1], 2, 100);
-            }
-
-            /* print MIDI frame */
-            for(int i = 0; i < 3; i++) {
-                printf("%02X ", midi_frame[i]);
-            }
-            printf("\n");
-            midi_process_frame(midi_frame);
-        }
         // TODO: can we wait for queue events instead?
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
@@ -179,11 +184,15 @@ void midi_init(void)
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
     };
-    ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(uart_num, UART_PIN_NO_CHANGE, MIDI_UART_RX_GPIO, \
+    ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
+    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, UART_PIN_NO_CHANGE, MIDI_UART_RX_GPIO, \
                                     UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
-    /* install UART driver using an event queue */
-    ESP_ERROR_CHECK(uart_driver_install(uart_num, UART_BUFFER_SIZE, \
-                                            UART_BUFFER_SIZE, 10, &uart_queue, 0));
+    /* install UART driver */
+    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, UART_BUFFER_SIZE, \
+                                            UART_BUFFER_SIZE, 0, NULL, 0));
+
+    uart_config.baud_rate = 115200;
+    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_0, UART_BUFFER_SIZE, \
+                                            UART_BUFFER_SIZE, 0, NULL, 0));
 }
