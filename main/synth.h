@@ -52,6 +52,7 @@ void synth_enable_lfo(uint8_t enabled);
 void synth_enable_osc2_sync(uint8_t enabled);
 
 void synth_update_osc1_freq(float freq);
+void synth_update_osc1_amp(float amp);
 void synth_update_osc1_waveform(waveform_t wf);
 void synth_update_osc2_freq(float freq);
 void synth_update_osc2_amp(float amp);

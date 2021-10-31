@@ -28,6 +28,7 @@
 #define MIDI_CC_SAVE_PRESET         (0x46)
 #define MIDI_CC_DUMP_PARAMS         (0x42)
 #define MIDI_CC_NOISE_AMP           (0x43)
+#define MIDI_CC_OSC1_AMP            (0x44)
 
 #define MIDI_UART_BAUDRATE      (31250)
 #define UART_BUFFER_SIZE        (1024 * 2)
@@ -43,6 +44,7 @@ static void dump_params(void)
     synth_get_params(&osc1_params, &osc2_params, &lfo_params, &envelope_params, &synth_params);
 
     printf("MIDI_VALUES_START\n");
+    printf("%02X:%02X\n", MIDI_CC_OSC1_AMP, (uint8_t) (osc1_params.amplitude / 15000.0 * 127.0));
     printf("%02X:%02X\n", MIDI_CC_OSC2_FREQ, (uint8_t) ((osc2_params.frequency - 100.0) / 1900.0 * 127.0));
     printf("%02X:%02X\n", MIDI_CC_OSC2_AMP, (uint8_t) (osc2_params.amplitude / 15000.0 * 127.0));
     printf("%02X:%02X\n", MIDI_CC_LFO_FREQ, (uint8_t) ((lfo_params.frequency - 0.1) / 19.9 * 127.0));
@@ -70,6 +72,10 @@ static void midi_process_cc(uint8_t *midi_frame)
     case MIDI_CC_OSC2_AMP:
         /* map the MIDI value (0...127) to an amplitude between 0 and 15000 */
         synth_update_osc2_amp((float) midi_frame[2] * 15000.0 / 127.0);
+        break;
+    case MIDI_CC_OSC1_AMP:
+        /* map the MIDI value (0...127) to an amplitude between 0 and 15000 */
+        synth_update_osc1_amp((float) midi_frame[2] * 15000.0 / 127.0);
         break;
     case MIDI_CC_LFO_FREQ:
         /* map the MIDI value (0...127) to an LFO frequency between 0.1 and 20 Hz */

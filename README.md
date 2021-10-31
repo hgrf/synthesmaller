@@ -7,7 +7,6 @@ NOTE: You can get `mkspiffs` from https://github.com/igrr/mkspiffs.
 
 ## TODO
 
-- add control of OSC1 amplitude from GUI
 - add readout of current preset for GUI
 
 - display: show sustain plateau as dashed / dotted line

@@ -403,6 +403,12 @@ void synth_update_osc1_waveform(waveform_t wf)
     synth_update_waveform(&m_osc1, wf);
 }
 
+void synth_update_osc1_amp(float amp)
+{
+    printf("Updating OSC1 amplitude: %.2f\n", amp);
+    synth_update_amp(&m_osc1, amp);
+}
+
 void synth_update_osc2_freq(float freq)
 {
     printf("Upating OSC2 frequency: %.2f Hz\n", freq);

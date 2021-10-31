@@ -25,6 +25,7 @@ MIDI_CC_SELECT_PRESET      = (0x07)
 MIDI_CC_SAVE_PRESET        = (0x46)
 MIDI_CC_DUMP_PARAMS        = (0x42)
 MIDI_CC_NOISE_AMP          = (0x43)
+MIDI_CC_OSC1_AMP           = (0x44)
 
 
 class GUI(QWidget):
@@ -48,7 +49,7 @@ class GUI(QWidget):
         # set up sliders
         for cc in [MIDI_CC_LFO_FREQ, MIDI_CC_OSC2_AMP, MIDI_CC_OSC2_FREQ,
                 MIDI_CC_ENV_ATTACK, MIDI_CC_ENV_DECAY, MIDI_CC_ENV_SUSTAIN,
-                MIDI_CC_ENV_RELEASE, MIDI_CC_NOISE_AMP]:
+                MIDI_CC_ENV_RELEASE, MIDI_CC_NOISE_AMP, MIDI_CC_OSC1_AMP]:
             self.add_control(cc, SliderWidget())
 
         # set up toggle buttons
@@ -71,6 +72,8 @@ class GUI(QWidget):
         layout = QGridLayout()
 
         layout.addWidget(QLabel("<b>OSC1</b>"), 0, 0)
+        layout.addWidget(QLabel("Amp"), 1, 0)
+        layout.addWidget(self.cc_map[MIDI_CC_OSC1_AMP], 2, 0)
         layout.addWidget(self.cc_map[MIDI_CC_WF_OSC1], 4, 0)
 
         layout.addWidget(QLabel("<b>OSC2</b>"), 0, 1)
