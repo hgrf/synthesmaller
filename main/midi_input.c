@@ -58,6 +58,7 @@ static void dump_params(void)
     printf("%02X:%02X\n", MIDI_CC_ENV_SUSTAIN, (uint8_t) (envelope_params.sustain * 127.0));
     printf("%02X:%02X\n", MIDI_CC_ENV_RELEASE, (uint8_t) ((envelope_params.release - 0.01) / 0.99 * 127.0));
     printf("%02X:%02X\n", MIDI_CC_NOISE_AMP, (uint8_t) (synth_params.noise_amplitude / 15000.0 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_SELECT_PRESET, (uint8_t) preset_get_current_index() * 20);
     printf("MIDI_VALUES_END\n");
 }
 

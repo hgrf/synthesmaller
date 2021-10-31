@@ -7,8 +7,6 @@ NOTE: You can get `mkspiffs` from https://github.com/igrr/mkspiffs.
 
 ## TODO
 
-- add readout of current preset for GUI
-
 - display: show sustain plateau as dashed / dotted line
 - display: show envelope values
 - display: add extra padding before text in black rectangles
