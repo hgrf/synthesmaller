@@ -98,7 +98,11 @@ static void midi_process_frame(uint8_t *midi_frame)
         midi_process_cc(midi_frame);
         break;
     case MIDI_SB_NOTE_ON:
-        synth_key_press(midi_frame[1], midi_frame[2]);
+        if(midi_frame[2] == 0x00) {
+            synth_key_release(midi_frame[1]);
+        } else {
+            synth_key_press(midi_frame[1], midi_frame[2]);
+        }
         break;
     case MIDI_SB_NOTE_OFF:
         synth_key_release(midi_frame[1]);
@@ -112,12 +116,37 @@ static void midi_process_frame(uint8_t *midi_frame)
 void midi_loop(void)
 {
     int length;
+    uint8_t first_byte;
     uint8_t midi_frame[3];
 
     for(;;) {
         ESP_ERROR_CHECK(uart_get_buffered_data_len(uart_num, (size_t*)&length));
-        if(length >= 3) {
-            uart_read_bytes(uart_num, midi_frame, 3, 100);
+
+        if(length > 0) {
+            uart_read_bytes(uart_num, &first_byte, 1, 100);
+
+            /* ignore active sense
+             * http://midi.teragonaudio.com/tech/midispec/sense.htm
+             */
+            if(first_byte == 0xfe) {
+                continue;
+            }
+
+            /* if the first byte is not a status byte, read only
+             * one more byte and keep the previous status byte
+             * (see "running status", e.g. in
+             * https://www.cs.cmu.edu/~music/cmsip/readings/Standard-MIDI-file-format-updated.pdf)
+             */
+            if((first_byte & 0b10000000) == 0) {
+                midi_frame[1] = first_byte;
+                uart_read_bytes(uart_num, &midi_frame[2], 1, 100);
+            } else {
+                midi_frame[0] = first_byte;
+                /* read rest of a 3 byte MIDI frame */
+                uart_read_bytes(uart_num, &midi_frame[1], 2, 100);
+            }
+
+            /* print MIDI frame */
             for(int i = 0; i < 3; i++) {
                 printf("%02X ", midi_frame[i]);
             }
