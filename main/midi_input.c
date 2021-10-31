@@ -43,8 +43,8 @@ static void dump_params(void)
     synth_get_params(&osc1_params, &osc2_params, &lfo_params, &envelope_params, &synth_params);
 
     printf("MIDI_VALUES_START\n");
-    printf("%02X:%02X\n", MIDI_CC_OSC2_FREQ, (uint8_t) ((osc2_params.amplitude - 100.0) / 1900.0 * 127.0));
-    printf("%02X:%02X\n", MIDI_CC_OSC2_AMP, (uint8_t) (osc2_params.frequency / 15000.0 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_OSC2_FREQ, (uint8_t) ((osc2_params.frequency - 100.0) / 1900.0 * 127.0));
+    printf("%02X:%02X\n", MIDI_CC_OSC2_AMP, (uint8_t) (osc2_params.amplitude / 15000.0 * 127.0));
     printf("%02X:%02X\n", MIDI_CC_LFO_FREQ, (uint8_t) ((lfo_params.frequency - 0.1) / 19.9 * 127.0));
     printf("%02X:%02X\n", MIDI_CC_LFO_ON_OFF, (uint8_t) synth_params.lfo_enabled);
     printf("%02X:%02X\n", MIDI_CC_OSC2_SYNC_ON_OFF, (uint8_t) synth_params.osc2_sync_enabled);
