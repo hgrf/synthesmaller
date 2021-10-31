@@ -119,7 +119,8 @@ static bool compare_osc_params(oscillator_params_t *params1, oscillator_params_t
 static bool compare_synth_params(synth_params_t *params1, synth_params_t *params2)
 {
     return (params1->lfo_enabled == params2->lfo_enabled) \
-        && (params1->osc2_sync_enabled == params2->osc2_sync_enabled);
+        && (params1->osc2_sync_enabled == params2->osc2_sync_enabled) \
+        && (params1->noise_amplitude == params2->noise_amplitude);
 }
 
 static bool compare_envelope_params(envelope_params_t *params1, envelope_params_t *params2)
@@ -180,11 +181,12 @@ static void display_synth_params(synth_params_t *params, synth_params_t *params_
     draw::filled_rectangle(lcd, srect16(x, y - 10, lcd.dimensions().width - WIDTH_PADDING, y + 10), lcd_color::black);
 
     /* draw string */
-    asprintf(&synth_params_str, "OSC2 sync: %s LFO: %s", // total length 23 characters
+    asprintf(&synth_params_str, "sync: %s LFO: %s NOISE=%.1f", // total length up to 32 characters
         params->osc2_sync_enabled ? "ON " : "OFF",
-        params->lfo_enabled ? "ON ": "OFF"
+        params->lfo_enabled ? "ON ": "OFF",
+        params->noise_amplitude
     );
-    draw::text(lcd, srect16(x, y - TEXT_HEIGHT / 2, x + 23 * FONT_DELTA_X, y + TEXT_HEIGHT / 2), (const char *) synth_params_str, FONT, lcd_color::white);
+    draw::text(lcd, srect16(x, y - TEXT_HEIGHT / 2, x + 32 * FONT_DELTA_X, y + TEXT_HEIGHT / 2), (const char *) synth_params_str, FONT, lcd_color::white);
     free(synth_params_str);
 
     /* update cache */

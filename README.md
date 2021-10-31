@@ -7,6 +7,9 @@ NOTE: You can get `mkspiffs` from https://github.com/igrr/mkspiffs.
 
 ## TODO
 
+- add control of OSC1 amplitude from GUI
+- add readout of current preset for GUI
+
 - display: show sustain plateau as dashed / dotted line
 - display: show envelope values
 - display: add extra padding before text in black rectangles
@@ -25,7 +28,6 @@ NOTE: You can get `mkspiffs` from https://github.com/igrr/mkspiffs.
 
 - add more voices
 - add simple sequencer
-- add noise
 - add filters
 
 ## References
